@@ -303,12 +303,15 @@ function ESP:Add(obj, options)
         return warn(obj, "has no parent")
     end
 
+    -- Initialize default color first
+    local initialColor = options.Color or self.Color
+
     local box = setmetatable({
         Name = options.Name or obj.Name,
-	MaxDistance = options.MaxDistance or 1000,
+        MaxDistance = options.MaxDistance or 1000,
         Type = "Box",
-	BoxVisible = options.Box,
-        Color = options.Color --[[or self:GetColor(obj)]],
+        BoxVisible = options.Box,
+        Color = initialColor,
         Size = options.Size or self.BoxSize,
         Object = obj,
         Player = options.Player or plrs:GetPlayerFromCharacter(obj),
@@ -326,30 +329,30 @@ function ESP:Add(obj, options)
 
     box.Components["Quad"] = Draw("Quad", {
         Thickness = self.Thickness,
-        Color = color,
+        Color = initialColor,
         Transparency = 1,
         Filled = false,
         Visible = self.Enabled and self.Boxes
     })
     box.Components["Name"] = Draw("Text", {
-		Text = box.Name,
-		Color = box.Color,
-		Center = true,
-		Outline = true,
+        Text = box.Name,
+        Color = initialColor,
+        Center = true,
+        Outline = true,
         Size = 19,
         Visible = self.Enabled and self.Names
-	})
-	box.Components["Distance"] = Draw("Text", {
-		Color = box.Color,
-		Center = true,
-		Outline = true,
+    })
+    box.Components["Distance"] = Draw("Text", {
+        Color = initialColor,
+        Center = true,
+        Outline = true,
         Size = 19,
         Visible = self.Enabled and self.Names
-	})
-	
-	box.Components["Tracer"] = Draw("Line", {
-		Thickness = ESP.Thickness,
-		Color = box.Color,
+    })
+    
+    box.Components["Tracer"] = Draw("Line", {
+        Thickness = ESP.Thickness,
+        Color = initialColor,
         Transparency = 1,
         Visible = self.Enabled and self.Tracers
     })
