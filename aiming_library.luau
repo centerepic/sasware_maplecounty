@@ -57,8 +57,10 @@ local function GetCharactersInViewport() : {{Character: Model, Position: Vector2
 
     if Aiming.Players then
         for _, Player in ipairs(Players:GetPlayers()) do
-            if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-                table.insert(ToProcess, Player.Character)
+            if Player ~= game.Players.LocalPlayer then
+                if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+                    table.insert(ToProcess, Player.Character)
+                end
             end
         end
     end
