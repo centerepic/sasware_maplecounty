@@ -368,33 +368,36 @@ local function CharAdded(char)
 		            MaxDistance = function() return ESP.PlayerDistance end,
                     Player = p,
                     PrimaryPart = c,
-                    ColorDynamic = function(Object : table)
+                    ColorDynamic = function(Object)
+						local ReturnColor = ESP.Color
 						local Player = Object.Player
 						local Char = Player and Player.Character
-					
+						
 						if not Char then
 							return ESP.Color
 						end
-					
-						local Hum = Char:FindFirstChildOfClass("Humanoid")
-					
-						if Hum then
-							local Health = Hum.Health
-							local MaxHealth = Hum.MaxHealth
-					
-							-- Check if Health and MaxHealth are valid numbers
-							if Health and MaxHealth and MaxHealth > 0 then
-								local Percent = Health / MaxHealth
-					
-								local r = 255 - (Percent * 255)
-								local g = Percent * 255
-								local b = 0
-					
-								return Color3.fromRGB(r, g, b)
-							end
-						end
 						
-						return ESP.Color  -- Fallback color in case Health or MaxHealth are nil
+						pcall(function()
+							local Hum = Char:FindFirstChildOfClass("Humanoid")
+						
+							if Hum then
+								local Health = Hum.Health
+								local MaxHealth = Hum.MaxHealth
+						
+								-- Check if Health and MaxHealth are valid numbers
+								if Health and MaxHealth and MaxHealth > 0 then
+									local Percent = Health / MaxHealth
+						
+									local r = 255 - (Percent * 255)
+									local g = Percent * 255
+									local b = 0
+						
+									ReturnColor = Color3.fromRGB(r, g, b)
+								end
+							end
+						end)
+						
+						return ReturnColor  -- Fallback color in case Health or MaxHealth are nil
 					end					
                 })
             end
