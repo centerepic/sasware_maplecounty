@@ -1,5 +1,5 @@
 local Players = game:GetService("Players")
-print('debug statement 192391239')
+print('debug statement 3423')
 
 -- added custom color coding for health
 -- will break if used on anything but players
@@ -46,27 +46,46 @@ local function Draw(obj, props)
 end
 
 function GetHealthBasedColor(char)
+    -- Early returns with default red color
     if not char then return Color3.fromRGB(255, 0, 0) end
     
     local hum = char:FindFirstChildOfClass("Humanoid")
     if not hum then return Color3.fromRGB(255, 0, 0) end
     
-    local health = hum.Health
-    local maxHealth = hum.MaxHealth
+    -- Ensure numeric values
+    local health = tonumber(hum.Health) or 0
+    local maxHealth = tonumber(hum.MaxHealth) or 100
     
-    -- Validate health values
-    if not health or not maxHealth or maxHealth <= 0 then 
+    -- Validate health values with safe defaults
+    if health <= 0 or maxHealth <= 0 then 
         return Color3.fromRGB(255, 0, 0)
     end
     
-    -- Calculate health percentage and color
+    -- Safe percentage calculation
     local percent = math.clamp(health / maxHealth, 0, 1)
-	warn(percent)
-    return Color3.fromRGB(
-        255 - (percent * 255),
-        percent * 255,
-        0
-    )
+    
+    -- Safe color component calculation
+    local red = math.clamp(255 - (percent * 255), 0, 255)
+    local green = math.clamp(percent * 255, 0, 255)
+    
+    return Color3.fromRGB(red, green, 0)
+end
+
+local function CreateColorDynamic(ESP)
+    return function(Object)
+        local player = Object.Player
+        if not player then return ESP.Color end
+        
+        local char = player.Character
+        if not char then return ESP.Color end
+        
+        -- Wrap color calculation in pcall with default
+        local success, color = pcall(function()
+            return GetHealthBasedColor(char)
+        end)
+        
+        return success and color or ESP.Color
+    end
 end
 
 function ESP:GetTeam(p)
@@ -383,60 +402,33 @@ function ESP:Add(obj, options)
     return box
 end
 
-local function CharAdded(char)
+function CharAdded(char)
     local p = plrs:GetPlayerFromCharacter(char)
+    if not p then return end -- Early return if no player
+    
+    local options = {
+        Box = true,
+        Name = p.Name,
+        MaxDistance = function() return ESP.PlayerDistance end,
+        Player = p,
+        ColorDynamic = CreateColorDynamic(ESP)
+    }
+    
     if not char:FindFirstChild("HumanoidRootPart") then
         local ev
         ev = char.ChildAdded:Connect(function(c)
             if c.Name == "HumanoidRootPart" then
                 ev:Disconnect()
-                ESP:Add(char, {
-		            Box = true,
-                    Name = p.Name,
-		            MaxDistance = function() return ESP.PlayerDistance end,
-                    Player = p,
-                    PrimaryPart = c,
-                    ColorDynamic = function(Object)
-						local player = Object.Player
-						if not player then return ESP.Color end
-						
-						local char = player.Character
-						if not char then return ESP.Color end
-						
-						local success, color = pcall(GetHealthBasedColor, char)
-						if not success then
-							return ESP.Color
-						end
-						
-						return color
-					end			
-                })
+                options.PrimaryPart = c
+                ESP:Add(char, options)
             end
         end)
     else
-        ESP:Add(char, {
-	        Box = true,
-            Name = p.Name,
-	        MaxDistance = function() return ESP.PlayerDistance end,
-            Player = p,
-            PrimaryPart = char.HumanoidRootPart,
-            ColorDynamic = function(Object)
-				local player = Object.Player
-				if not player then return ESP.Color end
-				
-				local char = player.Character
-				if not char then return ESP.Color end
-				
-				local success, color = pcall(GetHealthBasedColor, char)
-				if not success then
-					return ESP.Color
-				end
-				
-				return color
-			end
-        })
+        options.PrimaryPart = char.HumanoidRootPart
+        ESP:Add(char, options)
     end
 end
+
 local function PlayerAdded(p)
     p.CharacterAdded:Connect(CharAdded)
     if p.Character then
