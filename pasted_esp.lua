@@ -1,4 +1,5 @@
 local Players = game:GetService("Players")
+print('debug statement 192391239')
 
 -- added custom color coding for health
 -- will break if used on anything but players
