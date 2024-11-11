@@ -61,6 +61,7 @@ function GetHealthBasedColor(char)
     
     -- Calculate health percentage and color
     local percent = math.clamp(health / maxHealth, 0, 1)
+	warn(percent)
     return Color3.fromRGB(
         255 - (percent * 255),
         percent * 255,
@@ -208,7 +209,7 @@ function boxBase:Update()
     else
 	MaxDistance = self.MaxDistance
     end
-    local cft = self.PrimaryPart.CFrame
+    local cft = self:GetPivot()
     if (cam.CFrame.p - cft.p).magnitude > MaxDistance then
 	allow = false
     end
