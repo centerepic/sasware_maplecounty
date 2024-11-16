@@ -118,7 +118,7 @@ local function GetClosestPlayer() : (Model, number, Vector2)
     return ClosestPlayer, ClosestDistance, ClosestPosition
 end
 
-local Connection = RunService.RenderStepped:Connect(function()
+local Connection = RunService.PreRender:Connect(function()
 
     if Aiming.Enabled then
         UpdateFOV()
